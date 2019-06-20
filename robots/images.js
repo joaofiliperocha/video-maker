@@ -1,12 +1,15 @@
 const state = require("./state")
 const google = require("googleapis").google;
+const imagedownloader = require('image-downloader');
 const googleCustomSearch = google.customsearch("v1");
 const googleSearchCredentials = require('../credentials/google-search.json');
 
 async function robot() {
-    content = state.load();
-    await fetchGoogleImagesByKeywords(content);
-    state.save(content);
+    const content = state.load();
+    // await fetchGoogleImagesByKeywords(content);
+    await downloadAllImages(content)
+
+    //state.save(content);
 
     async function fetchGoogleImagesByKeywords(content) {
         for (const sentence of content.sentences) {
@@ -19,9 +22,6 @@ async function robot() {
         }
     }
 
-    const imageArray = await fetchGoogleImages("slayer");
-    console.dir(imageArray, { depth: null });
-    process.exit(0);
 
     async function fetchGoogleImages(query) {
         const response = await googleCustomSearch.cse.list({
@@ -37,6 +37,37 @@ async function robot() {
             return items.link;
         })
         return imagesURL;
+    }
+
+    async function downloadAllImages(content) {
+        content.downloadedImages = [];
+
+        for (let sentenceIndex = 0; sentenceIndex < content.sentences.length; sentenceIndex++) {
+            const images = content.sentences[sentenceIndex].images;
+            for (let imageIndex = 0; imageIndex < images.length; imageIndex++) {
+                const imageURl = images[imageIndex];
+                try {
+                    if (!content.downloadedImages.includes(imageURl)) {
+                        await downloadAndSaveImage(imageURl, `${sentenceIndex}-original.png`);
+                        content.downloadedImages.push(imageURl);
+                        break;
+                    }
+                    console.log(`gravada a imagem ${imageURl}`);
+                } catch (error) {
+                    console.log(`error:${error}`);
+                }
+
+            }
+
+        }
+
+    }
+
+    async function downloadAndSaveImage(url, file) {
+        return imagedownloader.image({
+            url: url,
+            dest: `./content/${file}`
+        });
     }
 
 }
