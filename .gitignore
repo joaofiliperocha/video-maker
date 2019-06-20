@@ -65,3 +65,6 @@ credentials/*.json
 
 #content.json
 content.json
+
+#conteudos 
+content/*.png
