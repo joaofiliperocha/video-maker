@@ -1,4 +1,5 @@
-const state = require("./state")
+const state = require("./state");
+const gm = require('gm').subClass({ imageMagick: true });
 const google = require("googleapis").google;
 const imagedownloader = require('image-downloader');
 const googleCustomSearch = google.customsearch("v1");
@@ -7,7 +8,9 @@ const googleSearchCredentials = require('../credentials/google-search.json');
 async function robot() {
     const content = state.load();
     // await fetchGoogleImagesByKeywords(content);
-    await downloadAllImages(content)
+    //await downloadAllImages(content)
+
+    await conertAllImages(content);
 
     //state.save(content);
 
@@ -70,6 +73,52 @@ async function robot() {
         });
     }
 
+    async function conertAllImages(content) {
+        for (let sentenceIndex = 0; sentenceIndex < content.sentences.length; sentenceIndex++) {
+            await convertImage(sentenceIndex);
+        }
+    }
+
+    async function convertImage(sentenceIndex) {
+        return new Promise((resolve, reject) => {
+            const inputFile = `.\\content\\${sentenceIndex}-original.png[0]`
+            const outputFile = `.\\content\\${sentenceIndex}-converted.png`
+
+            const width = 1920;
+            const height = 1980;
+
+            gm(inputFile)
+                .out('(')
+                .out('-clone')
+                .out('0')
+                .out('-background', 'white')
+                .out('-blur', '0x9')
+                .out('-resize', `${width}x${height}^`)
+                .out(')')
+                .out('(')
+                .out('-clone')
+                .out('0')
+                .out('-background', 'white')
+                .out('-resize', `${width}x${height}`)
+                .out(')')
+                .out('-delete', '0')
+                .out('-gravity', 'center')
+                .out('-compose', 'over')
+                .out('-composite')
+                .out('-extent', `${width}x${height}`)
+                .write(outputFile, (error) => {
+                    if (error) {
+                        return reject(error)
+                    }
+
+                    console.log(`> [video-robot] Image converted: ${outputFile}`)
+                    resolve()
+                })
+
+
+        })
+
+    }
 }
 
 module.exports = robot;
