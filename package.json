@@ -29,6 +29,7 @@
     "ibm-watson": "^4.2.1",
     "im": "^0.4.0",
     "image-downloader": "^3.4.2",
+    "js-file-download": "^0.4.10",
     "readline-sync": "^1.4.9",
     "sbd": "^1.0.15",
     "videoshow": "^0.1.12",

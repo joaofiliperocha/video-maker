@@ -183,8 +183,12 @@ async function robot() {
                 }
             };
 
+            var mp3Path = ".\\template\\default.mp3"
+            if (content.mp3Path)
+                mp3Path = content.mp3Path;
+
             videoshow(images, videoOptions)
-                .audio(".\\template\\XTaKeRuX_-_01_-_Free_will_possession.mp3")
+                .audio(mp3Path)
                 //.audio(".\\template\\Unison-Aperture-NCS-Release.mp3")
                 .save(".\\content\\output.mp4")
                 .on("start", function (command) {
